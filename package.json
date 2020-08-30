@@ -1,0 +1,19 @@
+{
+  "name": "log-instance",
+  "version": "0.1.0",
+  "description": "Client/server agnostic logging adapter",
+  "author": "Karl Lew",
+  "private": false,
+  "scripts": {
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "test": "npm run test:verbose",
+    "test:verbose": "mocha --inline-diffs",
+    "test:test": "mocha -w -R min --inline-diffs -g TEST"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^7.2.0",
+    "should": "^13.2.3",
+    "winston": "^3.2.1"
+  }
+}
