@@ -34,7 +34,7 @@
                     priority: 3,
                 },
             }
-            this.logLevel = opts.logLevel || opts.level || 'info';
+            this.level = opts.logLevel || opts.level || 'info';
             this.last = {};
         }
 
@@ -45,6 +45,14 @@
 
         static logInstance(inst, opts) {
             LogInstance.singleton.logInstance(inst, opts);
+        }
+
+        get level() {
+            return this.logLevel;
+        }
+
+        set level(value) {
+            this.logLevel = value;
         }
 
         get logLevel() {
