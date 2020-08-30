@@ -43,6 +43,10 @@
             return singleton;
         }
 
+        static logInstance(inst, opts) {
+            LogInstance.singleton.logInstance(inst, opts);
+        }
+
         get logLevel() {
             return this._logLevel;
         }
@@ -54,15 +58,14 @@
             this._logLevel = value;
         }
 
-        timestamp() {
-            var now = new Date();
-            return this.timestampFormat
-                .replace(/YYYY/g, now.getFullYear())
-                .replace(/MM/g, `0${now.getMonth()+1}`.slice(-2))
-                .replace(/DD/g, `0${now.getDate()}`.slice(-2))
-                .replace(/HH/g, `0${now.getHours()}`.slice(-2))
-                .replace(/mm/g, `0${now.getMinutes()}`.slice(-2))
-                .replace(/ss/g, `0${now.getSeconds()}`.slice(-2))
+        timestamp(now=new Date(), format=this.timestampFormat) {
+            return format
+                .replace(/YYYY/g, now.getUTCFullYear())
+                .replace(/MM/g, `0${now.getUTCMonth()+1}`.slice(-2))
+                .replace(/DD/g, `0${now.getUTCDate()}`.slice(-2))
+                .replace(/HH/g, `0${now.getUTCHours()}`.slice(-2))
+                .replace(/mm/g, `0${now.getUTCMinutes()}`.slice(-2))
+                .replace(/ss/g, `0${now.getUTCSeconds()}`.slice(-2))
                 ;
         }
 
@@ -74,6 +77,10 @@
                 this.last[handlerLevel] = handlerArgs;
                 handler.handler.apply(undefined, handlerArgs);
             }
+        }
+
+        lastLog(level='info') {
+            return (this.last[level] || []).join(' ');
         }
 
         debug(...args) {

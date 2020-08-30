@@ -6,7 +6,10 @@ and lets you use the same Javascript code for front- or back-end.
 ```
 npm install --save log-instance
 ```
-### logLevel
+### Usage
+See [test/log-instance.js](https://github.com/oyamist/log-instance/blob/master/test/log-instance.js)
+
+##### logLevel
 There are four logging levels: _debug_, _info_, _warn_ and _error_.
 The logging level can be set on individual object instances or in 
 the shared LogInstance.singleton.
@@ -19,7 +22,7 @@ logger.warn("oops"); // production message (unusual condition)
 logger.error("I died"); // production message (fatal condition)
 ```
 
-### log()
+##### log()
 A class can decorate instances with a log() method
 that logs at 'info' level (i.e., "I") and automatically
 includes the class name.
@@ -28,12 +31,21 @@ includes the class name.
 const { LogInstance } = require('log-instance');
 
 class MyUtility {
-    constructor() {
-        LogInstance.singleton.logInstance(this);
+    constructor(opts={}) {
+        var logger = opts.logger || LogInstance.singleton;
+        logger.logInstance(this);
         this.log('hello world!'); // (timestamp) I MyUtility: hello world!
     }
 }
 
+```
+
+#### lastLog(level)
+Returns most recently logged text for given level.
+
+```
+logger.error("goodbye world");
+logger.lastLog("error"); // ... ERROR goodbye world
 ```
 
 ### Example

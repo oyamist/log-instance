@@ -30,7 +30,22 @@
         // new properties are not enumerable
         should.deepEqual(Object.keys(obj), []);
     });
-    it("logLevel control logging", ()=>{
+    it("TESTTESTtimestamp(...) => timestamp", ()=>{
+        var now = new Date(Date.UTC(2020,0,31,13,22,33));
+        var logger = LogInstance.singleton;
+        should(logger.timestamp(now))
+            .equal("20200131 13:22:33");
+        should(logger.timestamp(now, "YYYY-MM-DD HHmmss"))
+            .equal("2020-01-31 132233");
+    });
+    it("TESTTESTlastLog(level) => most recent log", ()=>{
+        var logger = LogInstance.singleton;
+        logger.info("info message");
+        logger.warn("warn message");
+        should(logger.lastLog()).match(/ I info message/);
+        should(logger.lastLog("warn")).match(/ WARN warn message/);
+    });
+    it("logLevel controls logging", ()=>{
         var logger = new LogInstance({
             logLevel: "none",
         });
