@@ -2,6 +2,7 @@
     const should = require('should');
     const {
         LogInstance,
+        logger,
     } = require('../index');
 
     class MyUtility {
@@ -14,6 +15,9 @@
     it("default ctor", ()=>{
         var logger = new LogInstance();
         should(logger.logLevel).equal('info');
+    });
+    it("TESTTESTlogger is singleton", ()=>{
+        should(logger).equal(LogInstance.singleton);
     });
     it("logInstance(obj) decorates object", ()=>{
         var obj = {};
