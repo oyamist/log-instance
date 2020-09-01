@@ -9,6 +9,25 @@ npm install --save log-instance
 ### Usage
 See [test/log-instance.js](https://github.com/oyamist/log-instance/blob/master/test/log-instance.js)
 
+##### logInstance()
+Complex systems require global and local control over logging.
+Overall one might care only about warn() and error() messages,
+but one might, wish to log more detail for a particular
+object. 
+
+To deal with this usecase, logInstance() lets you decorate any object
+and turn it into a logger with its own logLevel.
+
+```
+var aObj = {name:"A"};
+logger.logLevel = 'warn'; // ignore 'info' messages
+logger.logInstance(aObj); // decorate aObj with logger methods/props
+aObj.logLevel = 'info'; // locally enable 'info' messages
+logger.info("Shared logger ignores this message");
+aObj.info("A says hello");
+console.log(logger.lastLog()); // A says hello
+```
+
 ##### logLevel
 There are four logging levels: _debug_, _info_, _warn_ and _error_.
 The logging level can be set on individual object instances or in 
