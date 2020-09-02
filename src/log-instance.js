@@ -60,6 +60,55 @@
                 ;
         }
 
+        static assertNonLogger(obj) {
+            var props = [ "_log", "logInstance", "logger", "logLevel", "lastLog",
+                "debug", "info", "log", "warn", "error", ];
+            props.forEach(prop=>{
+                if (obj[prop]) {
+                    throw new Error(`assertNonLogger() cannot override: ${prop}`);
+                }
+            });
+        }
+
+        static createLogger(parent, child, opts={}) {
+            let logLevel = opts.hasOwnProperty("logLevel")
+                ? opts.logLevel 
+                : parent.logLevel;
+            let addName = opts.addName !== false;
+            let doLog = (args,handlerLevel) => {
+                let name = child.name || child.constructor.name;
+                let logLevel = child.logLevel || parent.logLevel;
+                args = args.slice();
+                addName && (args[0] = `${name}: ${args[0]}`);
+                parent._log.call(parent, handlerLevel, logLevel, args);
+            };
+            LogInstance.assertNonLogger(child);
+            Object.defineProperty(child, '_log', {
+                value: (...args)=> parent.logger._log.apply(parent.logger, args),
+            });
+            Object.defineProperty(child, 'logInstance', {
+                value: (...args)=>{
+                    LogInstance.createLogger.apply(null , [child, ...args]);
+                },
+            });
+            Object.defineProperty(child, "logLevel", {
+                enumerable: false,
+                writable: true,
+                value: false, // follow Logger
+            });
+            Object.defineProperty(child, 'lastLog', {
+                value: (...args)=> parent.lastLog.apply(parent, args),
+            });
+            Object.defineProperty(child, 'logger', { value: parent, });
+            ["log","info","debug","warn","error"].forEach(level=>{
+                Object.defineProperty(child, level, {
+                    value: (...args)=> {
+                        doLog( args, level === 'log' ? 'info' : level);
+                    },
+                });
+            });
+        }
+
         get level() { // deprecated: use logLevel
             return this.logLevel;
         }
@@ -82,6 +131,11 @@
         _log(handlerLevel, logLevel, args) {
             var { levels, timestampFormat } = singleton;
             var handler = levels[handlerLevel];
+            var logger = this;
+            for (let i=0; i < 10 && !logLevel; i++) {
+                logLevel = logger.logLevel;
+                logger = logger.logger;
+            }
             if (levels[logLevel].priority <= handler.priority) {
                 var timestamp = LogInstance.timestamp(new Date(), timestampFormat);
                 var handlerArgs = [timestamp, handler.abbreviation, ...args];
@@ -98,6 +152,10 @@
             this._log("debug", this.logLevel, args);
         }
 
+        log(...args) {
+            this._log("info", this.logLevel, args);
+        }
+
         info(...args) {
             this._log("info", this.logLevel, args);
         }
@@ -110,84 +168,10 @@
             this._log("error", this.logLevel, args);
         }
 
-        logInstance(inst, opts={}) {
-            var that = this;
-            let logLevel = opts.hasOwnProperty("logLevel")
-                ? opts.logLevel 
-                : that.logLevel;
-            let addName = opts.addName !== false;
-            let doLog = (args,handlerLevel) => {
-                let name = inst.name || inst.constructor.name;
-                let logLevel = inst.logLevel || that.logLevel;
-                args = args.slice();
-                addName && (args[0] = `${name}: ${args[0]}`);
-                that._log.call(that, handlerLevel, logLevel, args);
-            };
-            if (inst._log) {
-                throw new Error(`cannot overwrite existing method: _log`);
-            }
-            Object.defineProperty(inst, '_log', {
-                value: (...args)=> that.logger._log.apply(that.logger, args),
-            });
-            if (inst.logInstance) {
-                throw new Error(`cannot overwrite existing method: logInstance`);
-            }
-            Object.defineProperty(inst, 'logInstance', {
-                value: (...args)=>{
-                    that.logInstance.apply(inst, args);
-                },
-            });
-            if (inst.logLevel) {
-                throw new Error(`cannot overwrite existing property: logLevel`);
-            }
-            Object.defineProperty(inst, "logLevel", {
-                enumerable: false,
-                writable: true,
-                value: false, // follow Logger
-            });
-            if (inst.logger) {
-                throw new Error(`cannot overwrite existing property: logger`);
-            }
-            Object.defineProperty(inst, 'logger', {
-                value: that,
-            });
-            if (inst.log) {
-                throw new Error(`cannot overwrite existing method: log()`);
-            }
-            Object.defineProperty(inst, 'log', {
-                value: (...args)=> doLog( args, 'info'),
-            });
-            if (inst.info) {
-                throw new Error(`cannot overwrite existing method: info()`);
-            }
-            Object.defineProperty(inst, 'info', {
-                value: (...args)=> doLog(args, 'info'),
-            });
-            if (inst.debug) {
-                throw new Error(`cannot overwrite existing method: debug()`);
-            }
-            Object.defineProperty(inst, 'debug', {
-                value: (...args)=> doLog(args, 'debug'),
-            });
-            if (inst.warn) {
-                throw new Error(`cannot overwrite existing method: warn()`);
-            }
-            Object.defineProperty(inst, 'warn', {
-                value: (...args)=> doLog(args, 'warn'),
-            });
-            if (inst.error) {
-                throw new Error(`cannot overwrite existing method: error()`);
-            }
-            Object.defineProperty(inst, 'error', {
-                value: (...args)=> doLog(inst, args, 'error'),
-            });
-            if (inst.lastLog) {
-                throw new Error(`cannot overwrite existing method: lastLog()`);
-            }
-            Object.defineProperty(inst, 'lastLog', {
-                value: (...args)=> that.lastLog.apply(that, args),
-            });
+        logInstance(child, opts={}) {
+            return LogInstance.createLogger(this, child, opts);
         }
+
     } 
 
     module.exports = exports.LogInstance = LogInstance;

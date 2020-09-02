@@ -160,32 +160,60 @@
         logger.info("but we aren't heard");
         should(logger.lastLog()).equal(lastLog); // unchanged
     });
+    it("TESTTESTlogInstance() cannot overwrite methods",()=>{
+        var badObj = {logger: "anything"};
+        var eCaught;
+        try {
+            logger.logInstance(badObj);
+        } catch(e) {
+            eCaught = e;
+        }
+        should(eCaught.message).match(/cannot override: logger/);
+    });
     it("TESTTESTlogInstance() creates a logger",()=>{
         var aObj = {name: "A"};
         var bObj = {name: "B"};
-        var aLogger = new LogInstance({
+        var cObj = {name: "C"};
+        var dObj = {name: "D"};
+        var testLogger = new LogInstance({
             name: "TestLogger",
             logLevel: "none", // disable all logging
         });
 
-        // The shared logger ignores 'info'
-
-        // Make aObj into a logger of TestLogger
-        aLogger.logInstance(aObj);
-        should(aObj.logger).equal(aLogger);
-        aObj.logLevel = 'info';  // override
-        aObj.log("Hi, I'm A"); 
-        should(aLogger.lastLog()).match(/Hi, I'm A/);
-        should(aObj.lastLog()).equal(aLogger.lastLog());
-        aLogger.info("Hi, I'm TestLogger"); // still ignored
-        should(aLogger.lastLog()).match(/Hi, I'm A/);
-
-        // Make bObj into a logger of aObj
+        // All logging disabled
+        testLogger.logInstance(aObj);
         aObj.logInstance(bObj);
+        bObj.logInstance(cObj);
+        cObj.logInstance(dObj);
+        should(testLogger.logger).equal(testLogger);
+        should(aObj.logger).equal(testLogger);
         should(bObj.logger).equal(aObj);
-        should(bObj.logLevel).equal(false); // follow aObj logLevel
-        should(bObj.lastLog()).match(/Hi, I'm A/);
-        bObj.log("Hi, I'm B");
-        should(aLogger.lastLog()).match(/Hi, I'm B/);
+        should(cObj.logger).equal(bObj);
+        should(dObj.logger).equal(cObj);
+        should(testLogger.logLevel).equal('none');
+        should(aObj.logLevel).equal(false); // follows testLogger
+        should(bObj.logLevel).equal(false); // follows aObj
+        should(cObj.logLevel).equal(false); // follows bObj
+        should(dObj.logLevel).equal(false); // follows cObj
+        testLogger.log("ignore testLogger");
+        aObj.log("ignore A"); 
+        bObj.log("ignore B"); 
+        cObj.log("ignore C"); 
+        dObj.log("ignore D"); 
+        should(testLogger.lastLog()).equal('');
+
+        // Enable logging for B, C and D
+        bObj.logLevel = 'info';  // override
+        testLogger.log("ignore testLogger");
+        should(testLogger.lastLog()).equal('');
+        aObj.log("Hi, I'm A"); 
+        should(testLogger.lastLog()).equal('');
+        bObj.log("Hi, I'm B");  // direct logLevel
+        should(testLogger.lastLog()).match(/Hi, I'm B/);
+        cObj.log("Hi, I'm C");  // indirect logLevel
+        should(testLogger.lastLog()).match(/Hi, I'm C/);
+        cObj.log("Hi, I'm D");  // indirect logLevel 
+        should(testLogger.lastLog()).match(/Hi, I'm D/);
+
     });
 })
