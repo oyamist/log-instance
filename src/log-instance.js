@@ -77,7 +77,7 @@
             let addName = opts.addName !== false;
             let doLog = (args,handlerLevel) => {
                 let name = child.name || child.constructor.name;
-                let logLevel = child.logLevel || parent.logLevel;
+                let logLevel = LogInstance.logLevel(child);
                 args = args.slice();
                 addName && (args[0] = `${name}: ${args[0]}`);
                 parent._log.call(parent, handlerLevel, logLevel, args);
@@ -128,15 +128,26 @@
             this._logLevel = value;
         }
 
+        static logLevel(logger) {
+            const MAX_LEVELS = 50;
+            for (let i=0; i < MAX_LEVELS; i++) {
+                if (logger.logLevel) {
+                    return logger.logLevel;
+                }
+                logger = logger.logger;
+            }
+            throw new Error(`MAX_LEVELS logger nesting exceeded. MAX_LEVELS:${MAX_LEVELS}`);
+        }
+
         _log(handlerLevel, logLevel, args) {
             var { levels, timestampFormat } = singleton;
             var handler = levels[handlerLevel];
-            var logger = this;
-            for (let i=0; i < 10 && !logLevel; i++) {
-                logLevel = logger.logLevel;
-                logger = logger.logger;
+            logLevel = logLevel || LogInstance.logLevel(this);
+            var levelInfo = levels[logLevel];
+            if (!levelInfo) {
+                throw new Error(`Invalid logLevel:${logLevel}`);
             }
-            if (levels[logLevel].priority <= handler.priority) {
+            if (levelInfo.priority <= handler.priority) {
                 var timestamp = LogInstance.timestamp(new Date(), timestampFormat);
                 var handlerArgs = [timestamp, handler.abbreviation, ...args];
                 this._lastLog[handlerLevel] = handlerArgs;

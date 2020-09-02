@@ -160,6 +160,29 @@
         logger.info("but we aren't heard");
         should(logger.lastLog()).equal(lastLog); // unchanged
     });
+    it("TESTTESTlogLevel() must be valid",()=>{
+        // LogInstance error handling
+        var eCaught;
+        var testLogger = new LogInstance();
+        try {
+            testLogger.logLevel = "bad";
+        } catch(e) {
+            eCaught = e;
+        }
+        should(eCaught.message).equal('invalid logLevel:"bad"');
+
+        // created logger error handling
+        eCaught = undefined;
+        var aObj = {name:"a"};
+        logger.logInstance(aObj);
+        aObj.logLevel = "bad";
+        try {
+            aObj.log("hello");
+        } catch(e) {
+            eCaught = e;
+        }
+        should(eCaught.message).equal('Invalid logLevel:bad');
+    });
     it("TESTTESTlogInstance() cannot overwrite methods",()=>{
         var badObj = {logger: "anything"};
         var eCaught;
@@ -209,11 +232,10 @@
         aObj.log("Hi, I'm A"); 
         should(testLogger.lastLog()).equal('');
         bObj.log("Hi, I'm B");  // direct logLevel
-        should(testLogger.lastLog()).match(/Hi, I'm B/);
+        should(testLogger.lastLog()).match(/I B: Hi, I'm B/);
         cObj.log("Hi, I'm C");  // indirect logLevel
-        should(testLogger.lastLog()).match(/Hi, I'm C/);
-        cObj.log("Hi, I'm D");  // indirect logLevel 
-        should(testLogger.lastLog()).match(/Hi, I'm D/);
-
+        should(testLogger.lastLog()).match(/I C: Hi, I'm C/);
+        dObj.log("Hi, I'm D");  // indirect logLevel 
+        should(testLogger.lastLog()).match(/I D: Hi, I'm D/);
     });
 })

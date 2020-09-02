@@ -1,6 +1,6 @@
 {
   "name": "log-instance",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Client/server agnostic logging adapter",
   "author": "Karl Lew",
   "private": false,
