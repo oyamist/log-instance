@@ -94,7 +94,7 @@
             Object.defineProperty(child, "logLevel", {
                 enumerable: false,
                 writable: true,
-                value: false, // follow Logger
+                value: opts.logLevel || false, // follow Logger
             });
             Object.defineProperty(child, 'lastLog', {
                 value: (...args)=> parent.lastLog.apply(parent, args),

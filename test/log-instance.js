@@ -51,21 +51,30 @@
             LogInstance.logInstance({logInstance:()=>'my-method'});
         });
     });
-    it("logInstance(obj) decorates object", ()=>{
-        var obj = {name:"aThing"};
+    it("TESTTESTlogInstance(obj) decorates object", ()=>{
 
         // Decorate object with logger methods and properties
-        logger.logInstance(obj);
-        should(obj.logger).equal(logger);
-        should(obj.logLevel).equal(false);
+        var obj1 = {name:"aThing1"};
+        logger.logInstance(obj1);
+        should(obj1.logger).equal(logger);
+        should(obj1.logLevel).equal(false);
         var msg = "info-text";
-        obj.info(msg);
+        obj1.info(msg);
         should(logger.lastLog()).match(new RegExp(msg));
 
         // new properties are not enumerable
         var noEnum = ["log","debug","warn","error","logInstance"];
-        should(Object.keys(obj).some(k=>noEnum.includes(k)))
+        should(Object.keys(obj1).some(k=>noEnum.includes(k)))
             .equal(false);
+
+        // Decorate with options
+        var obj2 = {name:"aThing2"};
+        logger.logInstance(obj2, {
+            logLevel: 'warn',
+        });
+        should(obj2.logger).equal(logger);
+        should(obj2.logLevel).equal('warn');
+
     });
     it("timestamp(...) => timestamp", ()=>{
         var now = new Date(Date.UTC(2020,0,31,13,22,33));
