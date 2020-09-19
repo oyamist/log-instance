@@ -3,6 +3,7 @@
     const {
         LogInstance,
         logger,
+        terseLogger,
     } = require('../index');
 
     class MyUtility {
@@ -69,6 +70,11 @@
     });
     it("logger is singleton", ()=>{
         should(logger).equal(LogInstance.singleton);
+    });
+    it("TESTTESTtestLogger is terseSingleton", ()=>{
+        should(terseLogger).equal(LogInstance.terseSingleton);
+        should(terseLogger.timestampFormat).equal('');
+        should(terseLogger.levelFormat).equal(0);
     });
     it("logInstance(obj) won't override existing methods/properties", ()=>{
         should.throws(()=> {

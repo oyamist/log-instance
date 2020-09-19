@@ -1,5 +1,6 @@
 (function(exports) {
     var singleton;
+    var terseSingleton;
     const LEVEL_FORMAT_NONE = 0;
     const LEVEL_FORMAT_COMPACDT = 0;
     const LEVEL_FORMAT = {
@@ -58,6 +59,14 @@
         static get singleton() {
             singleton = singleton || new LogInstance();
             return singleton;
+        }
+
+        static get terseSingleton() {
+            terseSingleton = terseSingleton || new LogInstance({
+                timestampFormat: '',
+                levelFormat: 'none',
+            });
+            return terseSingleton;
         }
 
         static logInstance(inst, opts) {
