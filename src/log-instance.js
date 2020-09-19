@@ -1,10 +1,30 @@
 (function(exports) {
     var singleton;
+    const LEVEL_FORMAT_NONE = 0;
+    const LEVEL_FORMAT_COMPACDT = 0;
+    const LEVEL_FORMAT = {
+        none: 0,
+        compact: 1,
+        auto: 2,
+        full: 3,
+    }
+    const LEVEL_ABBREVIATIONS = {
+        debug: ["","D","D","DEBUG"],
+        info: ["","I","I","INFO"],
+        warn: ["","W","WARN","WARN"],
+        error: ["","E","ERROR","ERROR"],
+    }
+
 
     class LogInstance {
         constructor(opts={}) {
             this.name = opts.name || "LogInstance";
-            this.timestampFormat = opts.timestampFormat || 'YYYYMMDD HH:mm:ss';
+            this.timestampFormat = opts.timestampFormat === undefined
+                ? 'YYYYMMDD HH:mm:ss'
+                : opts.timestampFormat;
+            this.levelFormat = LEVEL_FORMAT[opts.levelFormat] === undefined
+                ? LEVEL_FORMAT.auto
+                : LEVEL_FORMAT[opts.levelFormat];
             this.logger = this;
             this.levels = opts.levels || {
                 any: {
@@ -12,27 +32,22 @@
                 },
                 debug: {
                     handler: console.debug,
-                    abbreviation: "D",
                     priority: -1,
                 },
                 info: {
                     handler: console.log,
-                    abbreviation: "I",
                     priority: 0,
                 },
                 warn: {
                     handler: console.warn,
-                    abbreviation: "WARN",
                     priority: 1,
                 },
                 error: {
                     handler: console.error,
-                    abbreviation: "ERROR",
                     priority: 2,
                 },
                 none: {
                     handler: () => {},
-                    abbreviation: "NONE",
                     priority: 3,
                 },
             }
@@ -74,12 +89,11 @@
             let logLevel = opts.hasOwnProperty("logLevel")
                 ? opts.logLevel 
                 : parent.logLevel;
-            let addName = opts.addName !== false;
             let doLog = (args,handlerLevel) => {
                 let name = child.name || child.constructor.name;
                 let logLevel = LogInstance.logLevel(child);
                 args = args.slice();
-                addName && (args[0] = `${name}: ${args[0]}`);
+                args.unshift(`${name}:`);
                 parent._log.call(parent, handlerLevel, logLevel, args);
             };
             LogInstance.assertNonLogger(child);
@@ -136,11 +150,16 @@
                 }
                 logger = logger.logger;
             }
-            throw new Error(`MAX_LEVELS logger nesting exceeded. MAX_LEVELS:${MAX_LEVELS}`);
+            throw new Error(
+                `MAX_LEVELS logger nesting exceeded. MAX_LEVELS:${MAX_LEVELS}`);
+        }
+
+        levelAbbreviation(logLevel) {
+            return LEVEL_ABBREVIATIONS[logLevel][this.levelFormat];
         }
 
         _log(handlerLevel, logLevel, args) {
-            var { levels, timestampFormat } = singleton;
+            var { levels, timestampFormat} = this;
             var handler = levels[handlerLevel];
             logLevel = logLevel || LogInstance.logLevel(this);
             var levelInfo = levels[logLevel];
@@ -148,8 +167,13 @@
                 throw new Error(`Invalid logLevel:${logLevel}`);
             }
             if (levelInfo.priority <= handler.priority) {
-                var timestamp = LogInstance.timestamp(new Date(), timestampFormat);
-                var handlerArgs = [timestamp, handler.abbreviation, ...args];
+                var handlerArgs = args.slice();
+                var abbreviation = this.levelAbbreviation(handlerLevel);
+                abbreviation && handlerArgs.unshift(abbreviation);
+                if (timestampFormat) {
+                    let timestamp = LogInstance.timestamp(new Date(), timestampFormat);
+                    handlerArgs.unshift(timestamp);
+                }
                 this._lastLog[handlerLevel] = handlerArgs;
                 handler.handler.apply(undefined, handlerArgs);
             }

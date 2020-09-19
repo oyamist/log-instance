@@ -12,18 +12,60 @@
         }
     }
 
-    it("default ctor", ()=>{
+    it("TESTTESTdefault ctor", ()=>{
         var logger = new LogInstance();
         should(logger.logLevel).equal('info');
         should(logger.name).equal('LogInstance');
+        should(logger.levels.debug.handler).equal(console.debug);
+        should(logger.levels.info.handler).equal(console.log);
+        should(logger.levels.warn.handler).equal(console.warn);
+        should(logger.levels.error.handler).equal(console.error);
     });
     it("custom ctor", ()=>{
-        var logger = new LogInstance({
+        var timestampFormat = '';
+        var testLogger = new LogInstance({
             name: "TestLogger",
             logLevel: "warn",
+            levelFormat: "full",
+            timestampFormat,
         });
-        should(logger.name).equal('TestLogger');
-        should(logger.logLevel).equal('warn');
+        should(testLogger.name).equal('TestLogger');
+        should(testLogger.logLevel).equal('warn');
+        should(testLogger.levelAbbreviation('debug')).equal('DEBUG');
+        should(testLogger.levelAbbreviation('info')).equal('INFO');
+        should(testLogger.levelAbbreviation('warn')).equal('WARN');
+        should(testLogger.levelAbbreviation('error')).equal('ERROR');
+        should(testLogger.timestampFormat).equal('');
+
+        // auto level format
+        var testLogger = new LogInstance({
+            name: "TestLogger",
+            levelFormat: "auto", // default
+        });
+        should(testLogger.levelAbbreviation('debug')).equal('D');
+        should(testLogger.levelAbbreviation('info')).equal('I');
+        should(testLogger.levelAbbreviation('warn')).equal('WARN');
+        should(testLogger.levelAbbreviation('error')).equal('ERROR');
+
+        // none level format
+        var testLogger = new LogInstance({
+            name: "TestLogger",
+            levelFormat: "none",
+        });
+        should(testLogger.levelAbbreviation('debug')).equal('');
+        should(testLogger.levelAbbreviation('info')).equal('');
+        should(testLogger.levelAbbreviation('warn')).equal('');
+        should(testLogger.levelAbbreviation('error')).equal('');
+
+        // compact level format
+        var testLogger = new LogInstance({
+            name: "TestLogger",
+            levelFormat: "compact",
+        });
+        should(testLogger.levelAbbreviation('debug')).equal('D');
+        should(testLogger.levelAbbreviation('info')).equal('I');
+        should(testLogger.levelAbbreviation('warn')).equal('W');
+        should(testLogger.levelAbbreviation('error')).equal('E');
     });
     it("logger is singleton", ()=>{
         should(logger).equal(LogInstance.singleton);
@@ -51,7 +93,7 @@
             LogInstance.logInstance({logInstance:()=>'my-method'});
         });
     });
-    it("TESTTESTlogInstance(obj) decorates object", ()=>{
+    it("logInstance(obj) decorates object", ()=>{
 
         // Decorate object with logger methods and properties
         var obj1 = {name:"aThing1"};
@@ -84,14 +126,14 @@
         should(LogInstance.timestamp(now, "YYYY-MM-DD HHmmss"))
             .equal("2020-01-31 132233");
     });
-    it("lastLog(level) => most recent log", ()=>{
-        var logger = LogInstance.singleton;
+    it("TESTTESTlastLog(level) => most recent log", ()=>{
+        var logger = new LogInstance();
         logger.info("info message");
         logger.warn("warn message");
         should(logger.lastLog()).match(/ I info message/);
         should(logger.lastLog("warn")).match(/ WARN warn message/);
     });
-    it("logLevel controls logging", ()=>{
+    it("TESTTESTlogLevel controls logging", ()=>{
         var aLogger = new LogInstance({
             logLevel: 'none',
         });
@@ -169,7 +211,7 @@
         logger.info("but we aren't heard");
         should(logger.lastLog()).equal(lastLog); // unchanged
     });
-    it("TESTTESTlogLevel() must be valid",()=>{
+    it("logLevel() must be valid",()=>{
         // LogInstance error handling
         var eCaught;
         var testLogger = new LogInstance();
@@ -192,7 +234,7 @@
         }
         should(eCaught.message).equal('Invalid logLevel:bad');
     });
-    it("TESTTESTlogInstance() cannot overwrite methods",()=>{
+    it("logInstance() cannot overwrite methods",()=>{
         var badObj = {logger: "anything"};
         var eCaught;
         try {
@@ -202,7 +244,7 @@
         }
         should(eCaught.message).match(/cannot override: logger/);
     });
-    it("TESTTESTlogInstance() creates a logger",()=>{
+    it("logInstance() creates a logger",()=>{
         var aObj = {name: "A"};
         var bObj = {name: "B"};
         var cObj = {name: "C"};
@@ -246,5 +288,24 @@
         should(testLogger.lastLog()).match(/I C: Hi, I'm C/);
         dObj.log("Hi, I'm D");  // indirect logLevel 
         should(testLogger.lastLog()).match(/I D: Hi, I'm D/);
+    });
+    it("suppress level and timestamp",()=>{
+        var testLogger = new LogInstance({
+            name: "TestLogger",
+        });
+        testLogger.timestampFormat = "";
+        testLogger.levelFormat = "none";
+        var obj1 = {name:"obj1"};
+        testLogger.logInstance(obj1);
+        obj1.log("obj1-log");
+        should(testLogger.lastLog()).equal('obj1: obj1-log');
+
+        var obj2 = {name:"obj2"};
+        obj1.logInstance(obj2);
+        obj2.log("obj2-log");
+        should(testLogger.lastLog()).equal('obj2: obj2-log');
+
+        testLogger.log("test simple");
+        should(testLogger.lastLog()).equal('test simple');
     });
 })
