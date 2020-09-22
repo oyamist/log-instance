@@ -68,6 +68,7 @@ logger.lastLog("error"); // ... ERROR goodbye world
 ```
 
 ### Example
+#### logLevel (global/instance)
 ```
 var myUtil = new MyUtility();
 myUtil.log("hello world"); // 20200829 17:58:42 I MyUtility: hello world
@@ -79,6 +80,12 @@ logger.info("nobody hears us!"); // ignored
 myUtil.logLevel = "info"; // override logLevel for instance
 myUtil.log("I hear me!"); // 20200829 17:58:42 I MyUtility: I hear me!
 logger.info("we're still ignored!"); // ignored
+```
+#### AWS Logging
+Suppress timestamp and logging level for AWS CloudWatch logs
+```
+require {terseLogger:logger} = require("log-instance");
+logger.info("hello"); // No timestamp or logging level in output
 ```
 
 
