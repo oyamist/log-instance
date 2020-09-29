@@ -6,10 +6,16 @@
         terseLogger,
     } = require('../index');
 
-    class MyUtility {
+    class Animal {
         constructor(opts={}) {
             var logger = opts.logger || LogInstance.singleton;
             logger.logInstance(this);
+        }
+    }
+
+    class Koala extends Animal {
+        constructor(opts={}){
+            super(opts);
         }
     }
 
@@ -190,28 +196,28 @@
         should(aLogger.lastLog('info')).match(/ I info.any/);
         should(aLogger.lastLog('error')).match(/ ERROR error.any/);
     });
-    it("example",()=>{
-        var myUtil = new MyUtility();
-        should(myUtil.logger).equal(logger);
-        should(myUtil.logLevel).equal(false); // defer to logger for logLevel
+    it("TESTTESTexample",()=>{
+        var thing = new Koala();
+        should(thing.logger).equal(logger);
+        should(thing.logLevel).equal(false); // defer to logger for logLevel
 
         // The instance log() method logs at info level
         // and includes the class name
-        myUtil.log("hello world"); 
+        thing.log("hello world"); 
         var lastLog = logger.lastLog();
-        should(lastLog).match(/MyUtility: hello world/);
+        should(lastLog).match(/Koala: hello world/);
 
         // Increasing the logger logLevel suppresses log()
         logger.logLevel = 'warn';
-        myUtil.log("Nobody listens to me"); 
+        thing.log("Nobody listens to me"); 
         should(logger.lastLog()).equal(lastLog); // unchanged
 
 
         // The instance log() method can be enabled
-        myUtil.logLevel = 'info';
-        myUtil.log("hear me now"); 
+        thing.logLevel = 'info';
+        thing.log("hear me now"); 
         var lastLog = logger.lastLog();
-        should(lastLog).match(/MyUtility: hear me now/);
+        should(lastLog).match(/Koala: hear me now/);
 
         // but the logger.info() method is muted.
         logger.info("but we aren't heard");

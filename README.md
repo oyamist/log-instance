@@ -49,11 +49,11 @@ includes the class name.
 ```
 const { LogInstance } = require('log-instance');
 
-class MyUtility {
+class Koala {
     constructor(opts={}) {
         var logger = opts.logger || LogInstance.singleton;
         logger.logInstance(this);
-        this.log('hello world!'); // (timestamp) I MyUtility: hello world!
+        this.log('hello world!'); // 20200929 11:24:51 I Koala: hello world!
     }
 }
 
