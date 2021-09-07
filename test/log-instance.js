@@ -83,13 +83,13 @@
       var eCaught;
       console.warn("-------------------EXPECTED ERROR (BEGIN)-------------------");
       try {
-        koala.error(errCode, 'error test');
+        throw koala.error(errCode, 'error test');
       } catch(e) { eCaught = e; }
       should(eCaught.message).equal(errCode);
 
       eCaught = undefined;
       try {
-        logger.error(errCode, 'error test');
+        throw logger.error(errCode, 'error test');
       } catch(e) { eCaught = e; }
       should(eCaught.message).equal(errCode);
       console.warn("-------------------EXPECTED ERROR (END)-------------------");
@@ -184,7 +184,7 @@
         aLogger.logLevel = "error";
         aLogger.debug('debug.error');
         aLogger.info('info.error');
-        try { aLogger.error('error.error'); } catch(e) {eCaught = e}
+        try { throw aLogger.error('error.error'); } catch(e) {eCaught = e}
         should(eCaught.message).equal('error.error');
         should(aLogger.lastLog('debug')).equal('');
         should(aLogger.lastLog('info')).equal('');
@@ -195,7 +195,7 @@
         aLogger.logLevel = "info";
         aLogger.debug('debug.info');
         aLogger.info('info.info');
-        try { aLogger.error('error.info'); } catch(e) {eCaught = e}
+        try { throw aLogger.error('error.info'); } catch(e) {eCaught = e}
         should(eCaught.message).equal('error.info');
         should(aLogger.lastLog('debug')).equal('');
         should(aLogger.lastLog('info')).match(/info.info/);
@@ -206,7 +206,7 @@
         aLogger.logLevel = "debug";
         aLogger.debug('debug.debug');
         aLogger.info('info.debug');
-        try { aLogger.error('error.debug'); } catch(e) {eCaught = e}
+        try { throw aLogger.error('error.debug'); } catch(e) {eCaught = e}
         should(eCaught.message).equal('error.debug');
         should(aLogger.lastLog('debug')).match(/ D debug.debug/);
         should(aLogger.lastLog('info')).match(/ I info.debug/);
@@ -217,7 +217,7 @@
         aLogger.logLevel = "any";
         aLogger.debug('debug.any');
         aLogger.info('info.any');
-        try { aLogger.error('error.any'); } catch(e) {eCaught = e}
+        try { throw aLogger.error('error.any'); } catch(e) {eCaught = e}
         should(eCaught.message).equal('error.any');
         should(aLogger.lastLog('debug')).match(/ D debug.any/);
         should(aLogger.lastLog('info')).match(/ I info.any/);

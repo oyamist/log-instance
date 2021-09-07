@@ -104,7 +104,7 @@
                 let msgPrefix = args[0];
                 args = args.slice();
                 args.unshift(`${name}:`);
-                parent._log.call(parent, handlerLevel, logLevel, args, msgPrefix);
+                return parent._log.call(parent, handlerLevel, logLevel, args, msgPrefix);
             };
             LogInstance.assertNonLogger(child);
             Object.defineProperty(child, '_log', {
@@ -126,9 +126,7 @@
             Object.defineProperty(child, 'logger', { value: parent, });
             ["log","info","debug","warn","error"].forEach(level=>{
                 Object.defineProperty(child, level, {
-                    value: (...args)=> {
-                        doLog( args, level === 'log' ? 'info' : level);
-                    },
+                    value: (...args)=>doLog( args, level === 'log' ? 'info' : level),
                 });
             });
         }
@@ -189,9 +187,10 @@
                 if (handler.throws) {
                   let e = new Error(msgPrefix);
                   handler.handler.apply(undefined, [e]);
-                  throw e;
+                  return e;
                 }
             }
+            return undefined;
         }
 
         lastLog(level='info') {
@@ -199,24 +198,24 @@
         }
 
         debug(...args) {
-            this._log("debug", this.logLevel, args);
+            return this._log("debug", this.logLevel, args);
         }
 
         log(...args) {
-            this._log("info", this.logLevel, args);
+            return this._log("info", this.logLevel, args);
         }
 
         info(...args) {
-            this._log("info", this.logLevel, args);
+            return this._log("info", this.logLevel, args);
         }
 
         warn(...args) {
-            this._log("warn", this.logLevel, args);
+            return this._log("warn", this.logLevel, args);
         }
 
         error(...args) {
             let errCode = args[0];
-            this._log("error", this.logLevel, args, errCode);
+            return this._log("error", this.logLevel, args, errCode);
         }
 
         logInstance(child, opts={}) {
