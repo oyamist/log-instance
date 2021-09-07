@@ -19,7 +19,7 @@
         }
     }
 
-    it("TESTTESTdefault ctor", ()=>{
+    it("default ctor", ()=>{
         var logger = new LogInstance();
         should(logger.logLevel).equal('info');
         should(logger.name).equal('LogInstance');
@@ -77,7 +77,24 @@
     it("logger is singleton", ()=>{
         should(logger).equal(LogInstance.singleton);
     });
-    it("TESTTESTtestLogger is terseSingleton", ()=>{
+    it("TESTTESTerror throws", ()=>{
+      let koala = new Koala();
+      let errCode = "E_TEST";
+      var eCaught;
+      console.warn("-------------------EXPECTED ERROR (BEGIN)-------------------");
+      try {
+        koala.error(errCode, 'error test');
+      } catch(e) { eCaught = e; }
+      should(eCaught.message).equal(errCode);
+
+      eCaught = undefined;
+      try {
+        logger.error(errCode, 'error test');
+      } catch(e) { eCaught = e; }
+      should(eCaught.message).equal(errCode);
+      console.warn("-------------------EXPECTED ERROR (END)-------------------");
+    });
+    it("testLogger is terseSingleton", ()=>{
         should(terseLogger).equal(LogInstance.terseSingleton);
         should(terseLogger.timestampFormat).equal('');
         should(terseLogger.levelFormat).equal(0);
@@ -138,7 +155,7 @@
         should(LogInstance.timestamp(now, "YYYY-MM-DD HHmmss"))
             .equal("2020-01-31 132233");
     });
-    it("TESTTESTlastLog(level) => most recent log", ()=>{
+    it("lastLog(level) => most recent log", ()=>{
         var logger = new LogInstance();
         logger.info("info message");
         logger.warn("warn message");
@@ -146,6 +163,7 @@
         should(logger.lastLog("warn")).match(/ WARN warn message/);
     });
     it("TESTTESTlogLevel controls logging", ()=>{
+        var eCaught;
         var aLogger = new LogInstance({
             logLevel: 'none',
         });
@@ -161,42 +179,52 @@
         should(aLogger.lastLog('error')).equal('');
 
         // error level
+        console.warn('-------------------EXPECTED ERROR (BEGIN) ------------------');
+        eCaught = undefined;
         aLogger.logLevel = "error";
         aLogger.debug('debug.error');
         aLogger.info('info.error');
-        aLogger.error('error.error');
+        try { aLogger.error('error.error'); } catch(e) {eCaught = e}
+        should(eCaught.message).equal('error.error');
         should(aLogger.lastLog('debug')).equal('');
         should(aLogger.lastLog('info')).equal('');
         should(aLogger.lastLog('error')).match(/error.error/);
 
         // info level
+        eCaught = undefined;
         aLogger.logLevel = "info";
         aLogger.debug('debug.info');
         aLogger.info('info.info');
-        aLogger.error('error.info');
+        try { aLogger.error('error.info'); } catch(e) {eCaught = e}
+        should(eCaught.message).equal('error.info');
         should(aLogger.lastLog('debug')).equal('');
         should(aLogger.lastLog('info')).match(/info.info/);
         should(aLogger.lastLog('error')).match(/error.info/);
 
         // debug level
+        eCaught = undefined;
         aLogger.logLevel = "debug";
         aLogger.debug('debug.debug');
         aLogger.info('info.debug');
-        aLogger.error('error.debug');
+        try { aLogger.error('error.debug'); } catch(e) {eCaught = e}
+        should(eCaught.message).equal('error.debug');
         should(aLogger.lastLog('debug')).match(/ D debug.debug/);
         should(aLogger.lastLog('info')).match(/ I info.debug/);
         should(aLogger.lastLog('error')).match(/ ERROR error.debug/);
 
         // any level
+        eCaught = undefined;
         aLogger.logLevel = "any";
         aLogger.debug('debug.any');
         aLogger.info('info.any');
-        aLogger.error('error.any');
+        try { aLogger.error('error.any'); } catch(e) {eCaught = e}
+        should(eCaught.message).equal('error.any');
         should(aLogger.lastLog('debug')).match(/ D debug.any/);
         should(aLogger.lastLog('info')).match(/ I info.any/);
         should(aLogger.lastLog('error')).match(/ ERROR error.any/);
+        console.warn('-------------------EXPECTED ERROR (END) ------------------');
     });
-    it("TESTTESTexample",()=>{
+    it("example",()=>{
         var thing = new Koala();
         should(thing.logger).equal(logger);
         should(thing.logLevel).equal(false); // defer to logger for logLevel

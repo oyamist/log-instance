@@ -38,7 +38,7 @@ var logger = LogInstance.singleton;
 logger.debug("nobody hears me"); // ignored by default 'info' logLevel
 logger.info("hello"); // production message (normal)
 logger.warn("oops"); // production message (unusual condition)
-logger.error("I died"); // production message (fatal condition)
+logger.error("E_DEATH", "I died"); // production message (fatal condition) throw E_DEATH
 ```
 
 ##### log()

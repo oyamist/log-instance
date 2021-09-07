@@ -2,7 +2,6 @@
     var singleton;
     var terseSingleton;
     const LEVEL_FORMAT_NONE = 0;
-    const LEVEL_FORMAT_COMPACDT = 0;
     const LEVEL_FORMAT = {
         none: 0,
         compact: 1,
@@ -46,10 +45,11 @@
                 error: {
                     handler: console.error,
                     priority: 2,
+                    throws: true,
                 },
                 none: {
                     handler: () => {},
-                    priority: 3,
+                    priority: 4,
                 },
             }
             this.level = opts.logLevel || opts.level || 'info';
@@ -86,7 +86,7 @@
 
         static assertNonLogger(obj) {
             var props = [ "_log", "logInstance", "logger", "logLevel", "lastLog",
-                "debug", "info", "log", "warn", "error", ];
+                "debug", "info", "log", "warn", "error"];
             props.forEach(prop=>{
                 if (obj[prop]) {
                     throw new Error(`assertNonLogger() cannot override: ${prop}`);
@@ -101,9 +101,10 @@
             let doLog = (args,handlerLevel) => {
                 let name = child.name || child.constructor.name;
                 let logLevel = LogInstance.logLevel(child);
+                let msgPrefix = args[0];
                 args = args.slice();
                 args.unshift(`${name}:`);
-                parent._log.call(parent, handlerLevel, logLevel, args);
+                parent._log.call(parent, handlerLevel, logLevel, args, msgPrefix);
             };
             LogInstance.assertNonLogger(child);
             Object.defineProperty(child, '_log', {
@@ -167,7 +168,7 @@
             return LEVEL_ABBREVIATIONS[logLevel][this.levelFormat];
         }
 
-        _log(handlerLevel, logLevel, args) {
+        _log(handlerLevel, logLevel, args, msgPrefix="?msgPrefix?") {
             var { levels, timestampFormat} = this;
             var handler = levels[handlerLevel];
             logLevel = logLevel || LogInstance.logLevel(this);
@@ -185,6 +186,11 @@
                 }
                 this._lastLog[handlerLevel] = handlerArgs;
                 handler.handler.apply(undefined, handlerArgs);
+                if (handler.throws) {
+                  let e = new Error(msgPrefix);
+                  handler.handler.apply(undefined, [e]);
+                  throw e;
+                }
             }
         }
 
@@ -209,7 +215,8 @@
         }
 
         error(...args) {
-            this._log("error", this.logLevel, args);
+            let errCode = args[0];
+            this._log("error", this.logLevel, args, errCode);
         }
 
         logInstance(child, opts={}) {
