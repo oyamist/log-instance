@@ -1,8 +1,10 @@
 {
   "name": "log-instance",
   "version": "1.0.0",
-  "description": "Client/server agnostic logging adapter",
+  "description": "Instance-decorated logging for browser or NodeJS",
   "author": "Karl Lew",
+  "homepage": "https://github.com/oyamist/log-instance",
+  "license": "MIT",
   "private": false,
   "scripts": {
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
