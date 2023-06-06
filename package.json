@@ -1,6 +1,6 @@
 {
   "name": "log-instance",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Instance-decorated logging for browser or NodeJS",
   "author": "Karl Lew",
   "homepage": "https://github.com/oyamist/log-instance",
