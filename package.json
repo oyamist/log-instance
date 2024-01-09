@@ -11,9 +11,8 @@
     "test": "mocha --inline-diffs",
     "test:test": "mocha -w -R min --inline-diffs -g TEST"
   },
-  "dependencies": {},
   "devDependencies": {
-    "mocha": "^7.2.0",
+    "mocha": "^10.2.0",
     "should": "^13.2.3",
     "winston": "^3.2.1"
   }
