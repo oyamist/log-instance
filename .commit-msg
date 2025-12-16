@@ -1,9 +1,0 @@
-Add Makefile with commit target for streamlined commits
-
-Makefile provides `make commit` target to automate:
-- Stage changes (git add .)
-- Commit with message from .commit-msg
-- Show final status
-- Clean up .commit-msg file
-
-Simplifies workflow for Node 24 compatibility work.

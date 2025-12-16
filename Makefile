@@ -2,7 +2,8 @@
 
 commit:
 	@if [ ! -f .commit-msg ]; then echo "Error: .commit-msg not found"; exit 1; fi
-	git add .
-	git commit -m "$$(cat .commit-msg)"
+	@MSG=$$(cat .commit-msg); \
+	rm .commit-msg; \
+	git add .; \
+	git commit -m "$$MSG"; \
 	git status
-	rm .commit-msg
