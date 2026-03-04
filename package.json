@@ -8,12 +8,13 @@
   "private": false,
   "scripts": {
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
-    "test": "mocha --inline-diffs",
-    "test:test": "mocha -w -R min --inline-diffs -g TEST"
+    "test": "vitest run",
+    "test:test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "mocha": "^10.2.0",
-    "should": "^13.2.3",
-    "winston": "^3.2.1"
+    "@sc-voice/vitest": "^4.0.1"
+  },
+  "dependencies": {
   }
 }
