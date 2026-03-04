@@ -1,6 +1,6 @@
 {
   "name": "log-instance",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Instance-decorated logging for browser or NodeJS",
   "author": "Karl Lew",
   "homepage": "https://github.com/oyamist/log-instance",
@@ -15,6 +15,5 @@
   "devDependencies": {
     "@sc-voice/vitest": "^4.0.1"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
